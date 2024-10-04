@@ -2,12 +2,13 @@
 require 'connectSql.php';
 $username = $password = $gender = $email = $fullname = "";
 $ketQuaLoi = "";
+$ketQuaThanhCong = "";
 
 function test_input($data)
 {
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data);
+    $data = trim($data); // Xoas khoang trang dau va cuoi
+    $data = stripslashes($data); // Xoa dau /
+    $data = htmlspecialchars($data); // Chuyen cac ki tu dac biet sang ma html
     return $data;
 }
 
@@ -18,56 +19,46 @@ if (isset($_POST['sbSubmit'])) {
     $email = test_input($_POST['email']);
     $gender = test_input($_POST['gender']);
 
-    // Validate email format
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $ketQuaLoi = "Invalid email format";
-        return;
-    }
-
     // Check if username or email already exists
     $stmt = $conn->prepare("SELECT * FROM users WHERE username=? OR email=?");
     $stmt->bind_param("ss", $username, $email);
     $stmt->execute();
     $result = $stmt->get_result();
-    if ($result->num_rows > 0) {
-        echo "Username or email already exists. Please choose a different username or email.";
-        return;
-    }
     $stmt->close();
 
-    $targetDir = "uploads/";
-    $fileName = time() . '_' . $_FILES["fileToUpload"]["name"];
-    $targetFilePath = $targetDir . $fileName;
-    $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
+    // Validate email format
+    if (filter_var($email, FILTER_VALIDATE_EMAIL) && $result->num_rows === 0) {
+        $targetDir = "uploads/";
+        $fileName = time() . '_' . $_FILES["fileToUpload"]["name"];
+        $targetFilePath = $targetDir . $fileName;
+        $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
 
-    if (empty($_FILES["fileToUpload"]["name"])) {
-        echo 'Please select a file to upload';
-        return;
-    }
+        if (!empty($_FILES["fileToUpload"]["name"])) {
+            // Allow certain file formats
+            $allowTypes = array('jpg', 'png', 'jpeg', 'gif');
+            if (!in_array($fileType, $allowTypes)) {
+                $ketQuaLoi = 'Sorry, only JPG, JPEG, PNG, & GIF files are allowed to upload.';
+            } else {
+                // Upload file to server
+                if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $targetFilePath)) {
+                    $stmt = $conn->prepare("INSERT INTO users (username, password, fullname, avatar, gender, email) VALUES (?, ?, ?, ?, ?, ?)");
+                    $stmt->bind_param("ssssss", $username, $password, $fullname, $targetFilePath, $gender, $email);
 
-    // Allow certain file formats
-    $allowTypes = array('jpg', 'png', 'jpeg', 'gif');
-    if (!in_array($fileType, $allowTypes)) {
-        echo 'Sorry, only JPG, JPEG, PNG, & GIF files are allowed to upload.';
-        return;
-    }
-
-    // Upload file to server
-    if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $targetFilePath)) {
-        // Hash the password before storing it
-        // $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-        $stmt = $conn->prepare("INSERT INTO users (username, password, fullname, avatar, gender, email) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssss", $username, $password, $fullname, $targetFilePath, $gender, $email);
-
-        if ($stmt->execute()) {
-            echo "Created user successfully";
+                    if ($stmt->execute()) {
+                        $ketQuaThanhCong = "Created user successfully";
+                    } else {
+                        echo "Error: " . $stmt->error;
+                    }
+                    $stmt->close();
+                } else {
+                    $ketQuaLoi = 'Sorry, there was an error uploading your file.';
+                }
+            }
         } else {
-            echo "Error: " . $stmt->error;
+            $ketQuaLoi  = 'Please select a file to upload';
         }
-        $stmt->close();
     } else {
-        echo 'Sorry, there was an error uploading your file.';
+        $ketQuaLoi = "Error: Username or email already exists";
     }
 }
 
@@ -77,10 +68,15 @@ mysqli_close($conn);
 <div>
     <h2>Đăng ký</h2>
     <form method="POST" action="" enctype="multipart/form-data">
+
         <?php
         if ($ketQuaLoi) {
             echo '<div class="alert alert-danger" role="alert">';
             echo $ketQuaLoi;
+            echo '</div>';
+        } else if ($ketQuaThanhCong) {
+            echo '<div class="alert alert-success" role="alert">';
+            echo $ketQuaThanhCong;
             echo '</div>';
         } else {
             echo '';
@@ -121,7 +117,7 @@ mysqli_close($conn);
             </div>
         </div>
         <div>
-            <input type="submit" name="sbSubmit" value="Submit">
+            <input type="submit" class="btn btn-primary" style="width: 100%;" name="sbSubmit" value="Submit">
         </div>
     </form>
 </div>

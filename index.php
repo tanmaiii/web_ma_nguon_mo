@@ -12,7 +12,9 @@
 
     <?php include 'header.php'; ?>
 
-    <div class="container" style="margin-top:30px">
+    <?php include 'slider.php'; ?>
+
+    <div class="container " style="margin-top:30px; min-height: 100vh">
         <div class="row">
             <div class="col-sm-4">
                 <h2>About Me</h2>
@@ -45,8 +47,11 @@
                         include "./signup.php";
                         break;
                     case "login":
-                        include './signup.php';
+                        include './login.php';
                         break;
+                        case "upload":
+                            include './upload.php';
+                            break;
                     default:
                         include './home.php';
                         break;
