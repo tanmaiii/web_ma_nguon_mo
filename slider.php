@@ -10,7 +10,7 @@
             <div class="container">
                 <div class="carousel-caption text-start">
                     <h1>Example headline.</h1>
-                    <p class="opacity-75">Some representative placeholder content for the first slide of the carousel.</p>
+                    <p class="opacity-75">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Distinctio enim laboriosam at cupiditate consequatur incidunt doloremque quisquam similique eveniet voluptas ipsam, numquam cum harum. Architecto magnam veritatis ea distinctio illum?</p>
                 </div>
             </div>
         </div>

@@ -1,69 +1,114 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
+session_start();
+ob_start();
+include 'header.php';
+include 'slider.php';
+echo '<div class="container px-4 py-5 my-5">';
+?>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-</head>
+<div class="row g-5">
+    <div class="col-md-4">
+        <div class="position-sticky" style="top: 2rem;">
+            <div class="p-4 mb-3 bg-body-tertiary rounded">
+                <h4 class="fst-italic">About</h4>
+                <p class="mb-0">You arrived, and life arrived with you in all its forms and colors: plants grow, trees leaf and bloom, the cat meows, the dove coos, the sheep bleats, the cow moos, and every pet calls its mate. Everything feels life and forgets life's worries, remembering only life's happiness. If time were a body, you are its soul, and if it were an age, you are its youth.</p>
+            </div>
 
-<body>
-
-    <?php include 'header.php'; ?>
-
-    <?php include 'slider.php'; ?>
-
-    <div class="container " style="margin-top:30px; min-height: 100vh">
-        <div class="row">
-            <div class="col-sm-4">
-                <h2>About Me</h2>
-                <h5>Photo of me:</h5>
-                <div class="fakeimg">Fake Image</div>
-                <p>Some text about me in culpa qui officia deserunt mollit anim..</p>
-                <h3>Some Links</h3>
-                <p>Lorem ipsum dolor sit ame.</p>
-                <ul class="nav nav-pills flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">Active</a>
+            <div>
+                <h4 class="fst-italic">Recent Posts</h4>
+                <ul class="list-unstyled">
+                    <li>
+                        <a class="d-flex flex-column flex-lg-row gap-3 align-items-start align-items-lg-center py-3 link-body-emphasis text-decoration-none border-top" href="#">
+                            <svg class="bd-placeholder-img" width="100%" height="96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                <rect width="100%" height="100%" fill="#777"></rect>
+                            </svg>
+                            <div class="col-lg-8">
+                                <h6 class="mb-0">kjashskjdajkshdة</h6>
+                                <small class="text-body-secondary">15 12312 2024</small>
+                            </div>
+                        </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Link</a>
+                    <li>
+                        <a class="d-flex flex-column flex-lg-row gap-3 align-items-start align-items-lg-center py-3 link-body-emphasis text-decoration-none border-top" href="#">
+                            <svg class="bd-placeholder-img" width="100%" height="96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                <rect width="100%" height="100%" fill="#777"></rect>
+                            </svg>
+                            <div class="col-lg-8">
+                                <h6 class="mb-0">alksjdlkasjkldjaskljd</h6>
+                                <small class="text-body-secondary">14 12312 2024</small>
+                            </div>
+                        </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Link</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link disabled" href="#">Disabled</a>
+                    <li>
+                        <a class="d-flex flex-column flex-lg-row gap-3 align-items-start align-items-lg-center py-3 link-body-emphasis text-decoration-none border-top" href="#">
+                            <svg class="bd-placeholder-img" width="100%" height="96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                <rect width="100%" height="100%" fill="#777"></rect>
+                            </svg>
+                            <div class="col-lg-8">
+                                <h6 class="mb-0">alsjdlkasjkldjaslkjdaklsdlkas</h6>
+                                <small class="text-body-secondary">13 12312 2024</small>
+                            </div>
+                        </a>
                     </li>
                 </ul>
-                <hr class="d-sm-none">
             </div>
-            <div class="col-sm-8">
-                <?php
-                $page = isset($_GET['page']) ? $_GET['page'] : '';
-                switch ($page) {
-                    case 'signup':
-                        include "./signup.php";
-                        break;
-                    case "login":
-                        include './login.php';
-                        break;
-                        case "upload":
-                            include './upload.php';
-                            break;
-                    default:
-                        include './home.php';
-                        break;
-                }
-                ?>
+
+            <div class="p-4">
+                <h4 class="fst-italic">Year</h4>
+                <ol class="list-unstyled mb-0">
+                    <li><a href="#"> 2021</a></li>
+                    <li><a href="#"> 2021</a></li>
+                    <li><a href="#"> 2021</a></li>
+                    <li><a href="#"> 2020</a></li>
+                    <li><a href="#"> 2020</a></li>
+                    <li><a href="#"> 2020</a></li>
+                    <li><a href="#"> 2020</a></li>
+                    <li><a href="#"> 2020</a></li>
+                    <li><a href="#"> 2020</a></li>
+                    <li><a href="#"> 2020</a></li>
+                    <li><a href="#"> 2020</a></li>
+                    <li><a href="#"> 2020</a></li>
+                </ol>
+            </div>
+
+            <div class="p-4">
+                <h4 class="fst-italic"> ádasdasd</h4>
+                <ol class="list-unstyled">
+                    <li><a href="#">GitHub</a></li>
+                    <li><a href="#">Twitter</a></li>
+                    <li><a href="#">Facebook</a></li>
+                </ol>
             </div>
         </div>
     </div>
+    <div class="col-md-8 d-flex align-items-center flex-column">
+        <?php
+        $page = isset($_GET['page']) ? $_GET['page'] : '';
 
-    <?php include 'footer.php'; ?>
+        switch ($page) {
+            case 'signup':
+                include "./signup.php";
+                break;
+            case "login":
+                include './login.php';
+                break;
+            case "logout":
+                session_unset();
+                session_destroy();
+                header("Location: index.php?page=login");
+                break;
+            case "upload":
+                include './upload.php';
+                break;
+            default:
+                include './home.php';
+                break;
+        }
+        ?>
+    </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-</body>
-
-</html>
+<?php
+echo '</div>';
+include 'footer.php';
+?>
