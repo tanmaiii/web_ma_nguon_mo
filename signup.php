@@ -1,20 +1,7 @@
 <?php
 require 'connectSql.php';
-$username = $password = $avatar = $gender = $email = $fullname = "";
-// $servername = "localhost";
-// $username = "root";
-// $password = "";
-// $dbname = "db_laragon";
-// $port = 3307;
-
-// $conn = new mysqli($servername, $username, $password, $dbname, $port);
-
-// Kiểm tra kết nối
-// if ($conn->connect_error) {
-//     die("Kết nối thất bại: " . $conn->connect_error);
-// } else {
-//     echo "Kết nối thành công";
-// }
+$username = $password = $gender = $email = $fullname = "";
+$ketQuaLoi = "";
 
 function test_input($data)
 {
@@ -25,58 +12,62 @@ function test_input($data)
 }
 
 if (isset($_POST['sbSubmit'])) {
-    $ketquaupload = "";
-
     $username = test_input($_POST['username']);
     $fullname = test_input($_POST['fullname']);
     $password = test_input($_POST['password']);
-    $avatar = test_input($_POST['avatar']);
     $email = test_input($_POST['email']);
     $gender = test_input($_POST['gender']);
-    $email = test_input($_POST['email']);
 
-    $sql_check_username = "SELECT * FROM users WHERE username='$username'";
-    $sql_check_email = "SELECT * FROM users WHERE email='$email'";
+    // Validate email format
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $ketQuaLoi = "Invalid email format";
+        return;
+    }
 
-    $result_usename = $conn->query($sql_check_username);
-    $result_email = $conn->query($sql_check_email);
-
-    if ($result_usename->num_rows > 0 || $result_email->num_rows > 0) {
+    // Check if username or email already exists
+    $stmt = $conn->prepare("SELECT * FROM users WHERE username=? OR email=?");
+    $stmt->bind_param("ss", $username, $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
         echo "Username or email already exists. Please choose a different username or email.";
-    } else {
-        // if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] == 0) {
-        //     $target_dir = "uploads/";
-        //     $target_file = $target_dir . basename($_FILES["avatar"]["name"]);
-        //     $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+        return;
+    }
+    $stmt->close();
 
-        //     // Check if image file is a actual image or fake image
-        //     $check = getimagesize($_FILES["avatar"]["tmp_name"]);
-        //     if ($check !== false) {
-        //         if (move_uploaded_file($_FILES["avatar"]["tmp_name"], $target_file)) {
-        //             $avatar = $target_file;
-        //         } else {
-        //             echo "Sorry, there was an error uploading your file.";
-        //             exit;
-        //         }
-        //     } else {
-        //         echo "File is not an image.";
-        //         exit;
-        //     }
-        // } else {
-        //     echo "No file was uploaded.";
-        //     exit;
-        // }
+    $targetDir = "uploads/";
+    $fileName = time() . '_' . $_FILES["fileToUpload"]["name"];
+    $targetFilePath = $targetDir . $fileName;
+    $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
 
-        $sql = "INSERT INTO users (username, password, fullname, avatar, gender, email)
-    VALUES ('$username', '$password', '$fullname', '$avatar', 0, '$email')";
+    if (empty($_FILES["fileToUpload"]["name"])) {
+        echo 'Please select a file to upload';
+        return;
+    }
 
-        // echo $sql;
+    // Allow certain file formats
+    $allowTypes = array('jpg', 'png', 'jpeg', 'gif');
+    if (!in_array($fileType, $allowTypes)) {
+        echo 'Sorry, only JPG, JPEG, PNG, & GIF files are allowed to upload.';
+        return;
+    }
 
-        if ($conn->query($sql) === TRUE) {
+    // Upload file to server
+    if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $targetFilePath)) {
+        // Hash the password before storing it
+        // $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        $stmt = $conn->prepare("INSERT INTO users (username, password, fullname, avatar, gender, email) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssss", $username, $password, $fullname, $targetFilePath, $gender, $email);
+
+        if ($stmt->execute()) {
             echo "Created user successfully";
         } else {
-            echo "Error: " . $sql . "<br>" . $conn->error;
+            echo "Error: " . $stmt->error;
         }
+        $stmt->close();
+    } else {
+        echo 'Sorry, there was an error uploading your file.';
     }
 }
 
@@ -85,7 +76,16 @@ mysqli_close($conn);
 
 <div>
     <h2>Đăng ký</h2>
-    <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+    <form method="POST" action="" enctype="multipart/form-data">
+        <?php
+        if ($ketQuaLoi) {
+            echo '<div class="alert alert-danger" role="alert">';
+            echo $ketQuaLoi;
+            echo '</div>';
+        } else {
+            echo '';
+        }
+        ?>
         <div class="mb-3">
             <label for="formGroupExampleInput" class="form-label">Username</label>
             <input type="text" name="username" class="form-control" id="formGroupExampleInput" placeholder="Example input placeholder">
@@ -100,22 +100,22 @@ mysqli_close($conn);
         </div>
         <div class="mb-3">
             <label for="formGroupExampleInput2" class="form-label">Password</label>
-            <input type="text" name="password" class="form-control" id="formGroupExampleInput2" placeholder="Another input placeholder">
+            <input type="password" name="password" class="form-control" id="formGroupExampleInput2" placeholder="Another input placeholder">
         </div>
 
         <div class="mb-3">
             <label for="formFile" class="form-label">Avatar</label>
-            <input class="form-control" name="avatar" type="file">
+            <input class="form-control" id="fileToUpload" name="fileToUpload" type="file">
         </div>
         <div class="mb-3">
             <label for="formFile" class="form-label">Giới tính</label>
             <div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" name="gender" type="radio" value="1" name="inlineRadioOptions" id="inlineRadio1">
+                    <input class="form-check-input" name="gender" type="radio" value="1" id="inlineRadio1">
                     <label class="form-check-label" for="inlineRadio1">Nam</label>
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" name="gender" type="radio" value="0" name="inlineRadioOptions" id="inlineRadio2">
+                    <input class="form-check-input" name="gender" type="radio" value="0" id="inlineRadio2">
                     <label class="form-check-label" for="inlineRadio2">Nữ</label>
                 </div>
             </div>
@@ -124,4 +124,5 @@ mysqli_close($conn);
             <input type="submit" name="sbSubmit" value="Submit">
         </div>
     </form>
+</div>
 </div>

@@ -6,7 +6,6 @@
             </button>
             <div class="collapse navbar-collapse d-flex justify-content-between" id="collapsibleNavbar">
                 <div>
-
                 </div>
                 <div>
                     <ul class="navbar-nav">
