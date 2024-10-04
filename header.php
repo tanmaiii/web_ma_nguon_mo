@@ -11,10 +11,10 @@
                 <div>
                     <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a class="nav-link" href="login.php">Đăng nhập</a>
+                            <a class="nav-link" href="index.php?page=login">Đăng nhập</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="login.php">Đăng ký</a>
+                            <a class="nav-link" href="index.php?page=signup">Đăng ký</a>
                         </li>
                     </ul>
                 </div>
