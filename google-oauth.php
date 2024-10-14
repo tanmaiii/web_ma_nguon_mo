@@ -1,9 +1,10 @@
 <?php
 // Initialize the session
 session_start();
+$config = require 'config.php';
 // Update the following variables
-$google_oauth_client_id = '139024025713-g006hbe3mumdrso1tshtll9qvqi6pl22.apps.googleusercontent.com'; // Lấy từ Google Developer Console
-$google_oauth_client_secret = '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'; // Lấy từ Google Developer Console
+$google_oauth_client_id = $config['GOOGLE_ID']; // Lấy từ Google Developer Console
+$google_oauth_client_secret = $config['GOOGLE_SECRET']; // Lấy từ Google Developer Console
 $google_oauth_redirect_uri = 'http://localhost/web_ma_nguon_mo/google-oauth.php'; // Địa chỉ URL của trang web
 $google_oauth_version = 'v3';
 
