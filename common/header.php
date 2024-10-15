@@ -2,51 +2,6 @@
 session_start();
 ob_start();
 
-// if (isset($_SESSION['google_loggedin'])) {
-//     // Retrieve session variables
-//     $google_loggedin = $_SESSION['google_loggedin'];
-//     $google_email = $_SESSION['google_email'];
-//     $google_name = $_SESSION['google_name'];
-//     $google_picture = $_SESSION['google_picture'];
-
-//     include 'connectSql.php'; // Include your database connection file
-
-//     // Check if google_email exists in the users table
-//     $query = "SELECT * FROM users WHERE email = ?";
-//     $stmt = $conn->prepare($query);
-//     $stmt->bind_param("s", $google_email);
-//     $stmt->execute();
-//     $result = $stmt->get_result();
-//     $row = $result->fetch_assoc();
-
-//     if ($result->num_rows == 0) {
-//         $insert_query = $conn->prepare("INSERT INTO users (username, password, fullname, avatar, gender, email) VALUES (?, ?, ?, ?, 1, ?)");
-//         $insert_query->bind_param("sssss", $google_email, $google_email, $google_email, $google_picture, $google_email);
-
-//         if ($insert_query->execute()) {
-//             $_SESSION['username'] = $google_email;
-//             $_SESSION['email'] = $google_email;
-//             $_SESSION['avatar'] = $google_picture;
-//             $_SESSION['userId'] = $conn->insert_id;
-//             $_SESSION['role'] = 1;
-//             header("Location: index.php");
-//             exit;
-//         } else {
-//             echo "Error: {$insert_query}<br>{$conn->error}";
-//         }
-//     } else {
-//         $_SESSION['username'] = $row['username'];
-//         $_SESSION['email'] = $row['email'];
-//         $_SESSION['avatar'] = $row['avatar'];
-//         $_SESSION['userId'] = $row['userId'];
-//         $_SESSION['role'] = $row['role'];
-//         header("Location: index.php");
-//         exit;
-//     }
-
-//     $stmt->close();
-//     $conn->close();
-// }
 
 if (isset($_POST['logout'])) {
     session_unset();

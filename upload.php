@@ -6,7 +6,7 @@ include 'common/header.php';
 require 'connectSql.php';
 
 if (!isset($_SESSION['username'])) {
-    header("Location: index.php?page=login");
+    header("Location: index.php");
     exit();
 }
 

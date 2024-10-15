@@ -67,7 +67,6 @@ if ($result->num_rows > 0) {
                             <img class="object-fit-cover border border-info-subtle" style="width: 60px; height: 60px;" src='<?php echo $row['imageUrl']  ?>' alt="">
                         </td>
                         <td><?php echo $row['status'] == 1 ? 'Ẩn' : 'Hiện' ?></td>
-                        <!-- <td><?php echo $row['status'] ?></td> -->
                         <td>
                             <a href="edit_slide.php?id=<?php echo $row['id']; ?>" class="btn btn-warning btn-sm">Sửa</a>
 
