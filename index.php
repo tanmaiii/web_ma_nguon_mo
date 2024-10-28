@@ -144,11 +144,13 @@ if (isset($_POST['sbUpload']) && isset($_SESSION['userId'])) {
                         </a>
                         <p class="card-text">
                             <?php
-                            $categorySql = "SELECT title FROM categories WHERE categoryId = " . $row['categoryId'];
-                            $categoryResult = $conn->query($categorySql);
-                            if ($categoryResult->num_rows > 0) {
-                                $categoryRow = $categoryResult->fetch_assoc();
-                                echo '<span class="bg-dark text-white px-2 rounded">' . $categoryRow['title'] . '</span>';
+                            if ($row['categoryId']) {
+                                $categorySql = "SELECT title FROM categories WHERE categoryId = " . $row['categoryId'];
+                                $categoryResult = $conn->query($categorySql);
+                                if ($categoryResult->num_rows > 0) {
+                                    $categoryRow = $categoryResult->fetch_assoc();
+                                    echo '<span class="bg-dark text-white px-2 rounded">' . $categoryRow['title'] . '</span>';
+                                }
                             }
                             ?>
 

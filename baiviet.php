@@ -4,6 +4,8 @@ use function PHPSTORM_META\map;
 
 include 'common/header.php';
 require 'connectSql.php';
+$postId = null;
+$title = $desc = $fileUrl = $createdAt = $username = $avatar = "";
 
 if (!isset($_GET['postId'])) {
     header("Location: index.php");
@@ -77,18 +79,35 @@ if (isset($_POST['sbUpload'])) {
     }
 }
 
+
+// Xử lý khi người dùng nhấn nút phản hồi
 if (isset($_POST['sbPhanHoi'])) {
-    $sql = "INSERT INTO comments (userId, content, postId, parentId) VALUES (?, ?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("isi", $userId, $content, $postId, $commentId);
-    if ($stmt->execute()) {
-        $ketQuaThanhCong = "Upload thành công";
-        header("Location: baiviet.php?postId=$postId");
-    } else {
-        $ketQuaLoi = "Error: {$stmt->error}";
+    $content = $_REQUEST['txtContent'];
+    $userId = $_SESSION['userId'];
+    $commentIdReply = $_REQUEST['commentIdReply'];
+
+    if ($commentIdReply) {
+        $sql = "INSERT INTO comments (userId, content, postId, parentId) VALUES (?, ?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("isii", $userId, $content, $postId, $commentIdReply);
+        if ($stmt->execute()) {
+            $ketQuaThanhCong = "Upload thành công";
+            header("Location: baiviet.php?postId=$postId");
+        } else {
+            $ketQuaLoi = "Error: {$stmt->error}";
+        }
+        $stmt->close();
     }
-    $stmt->close();
 }
+
+//Xử lý ẩn comment
+if (isset($_POST['toggle_visibility'])) {
+    $commentId = $_REQUEST['hideCommentId'];
+    $sql = "UPDATE comments SET status = 0 WHERE commentId = $commentId";
+    $conn->query($sql);
+    header("Location: baiviet.php?postId=$postId");
+}
+
 ?>
 
 <!-- // Bài viết -->
@@ -163,25 +182,31 @@ if (isset($_POST['sbPhanHoi'])) {
                         }
                         if ($_SESSION['role'] == 0) {
                         ?>
-                            <a href="">
+                            <form style="display: inline;" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn ẩn bình luận này không?');"></form>
+                            <input type="hidden" name="hideCommentId" value="<?php echo $commentRow['commentId'] ?>">
+                            <button type="submit" name="toggle_visibility" class="btn btn-danger mt-4">
                                 Ẩn bình luận
-                            </a>
+                            </button>
+                            </form>
                         <?php
                         }
                         ?>
                         <?php if (isset($_SESSION['userId'])): ?>
-                            <button type="button" class="btn btn-primary mt-4" data-bs-toggle="modal" data-bs-target="#modalPhanHoiBinhLuan">
+                            <button type="submit" class="btn btn-primary mt-4" data-bs-toggle="modal" data-bs-target="#modalPhanHoiBinhLuan"
+                                onclick="document.getElementById('commentIdReply').value = <?php echo $commentRow['commentId'] ?>">
                                 Phản hồi bình luận
                             </button>
                         <?php else: ?>
-                            <div class="alert alert-warning mt-4" role="alert">
+                            <div class=" alert alert-warning mt-4" role="alert">
                                 Bạn cần đăng nhập để trả lời.
                             </div>
-                        <?php endif; ?>
                     </div>
+                <?php endif; ?>
                 </div>
+    </div>
 
-                <?php
+    <!-- Bình luận con -->
+    <?php
                 $replySql = "SELECT c.* , u.username, u.avatar 
                              FROM comments c 
                              JOIN users u ON c.userId = u.userId 
@@ -191,50 +216,52 @@ if (isset($_POST['sbPhanHoi'])) {
 
                 if ($replyResult->num_rows > 0) {
                     while ($replyRow = $replyResult->fetch_assoc()) {
-                ?>
-                        <div class="card media border p-3 d-flex flex-column mb-2" style="width: 90%; margin-left: 10%;">
-                            <div class="d-flex flex-row gap-2 align-items-center">
-                                <img width="40px" height="40px" src="<?php echo $replyRow['avatar'] ?>" alt="John Doe" class="rounded-circle">
-                                <h5><?php echo $replyRow['username'] ?></h5>
-                                <small><i><?php echo $replyRow['createdAt'] ?></i></small>
-                            </div>
-                            <div class="media-body">
-                                <p><?php echo $replyRow['content'] ?></p>
-                                <?php
-                                if ($replyRow['fileUrl']) {
-                                ?>
-                                    <div>
-                                        <img style="width: 500px; height: 500px" src="<?php echo $replyRow['fileUrl'] ?>" class="img-fluid" alt="..." />
-                                    </div>
-                                <?php
-                                }
-                                ?>
-                                <?php
-                                if ($_SESSION['role'] == 0) {
-                                ?>
-                                    <button onclick="">
-                                        Ẩn bình luận
-                                    </button>
-                                <?php
-                                }
-                                ?>
-                            </div>
+    ?>
+            <div class="card media border p-3 d-flex flex-column mb-2" style="width: 90%; margin-left: 10%;">
+                <div class="d-flex flex-row gap-2 align-items-center">
+                    <img width="40px" height="40px" src="<?php echo $replyRow['avatar'] ?>" alt="John Doe" class="rounded-circle">
+                    <h5><?php echo $replyRow['username'] ?></h5>
+                    <small><i><?php echo $replyRow['createdAt'] ?></i></small>
+                </div>
+                <div class="media-body">
+                    <p><?php echo $replyRow['content'] ?></p>
+                    <?php
+                        if ($replyRow['fileUrl']) {
+                    ?>
+                        <div>
+                            <img style="width: 500px; height: 500px" src="<?php echo $replyRow['fileUrl'] ?>" class="img-fluid" alt="..." />
                         </div>
-                <?php
+                    <?php
+                        }
+                    ?>
+                    <?php
+                        if ($_SESSION['role'] == 0) {
+                    ?>
+                        <form method="POST">
+                            <input type="hidden" name="hideCommentId" value="<?php echo $replyRow['commentId'] ?>">
+                            <button type="submit" name="toggle_visibility" class="btn btn-danger mt-4">
+                                Ẩn bình luận
+                            </button>
+                        </form>
+                    <?php
+                        }
+                    ?>
+                </div>
+            </div>
+    <?php
                     }
                 }
-                ?>
-        <?php
+    ?>
+<?php
             }
         } else {
             echo '<p>No comments yet.</p>';
         }
-        ?>
-    </div>
+?>
+</div>
 </div>
 
 
-<!-- Modal phản hồi bình luận -->
 <div class="modal fade" id="modalPhanHoiBinhLuan" tabindex="-1" aria-labelledby="modalPhanHoiBinhLuan" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -258,11 +285,12 @@ if (isset($_POST['sbPhanHoi'])) {
                     }
                     ?>
 
-                    <div class="mb-3">
+                    <input type="text" class="form-control" id="commentIdReply" name="commentIdReply" readonly>
+
+                    <div class=" mb-3">
                         <label for="description" class="form-label">Trả lời</label>
                         <textarea class="form-control" id="txtContent" name="txtContent" rows="6" style="resize: none;" placeholder="Nhập mô tả" required></textarea>
                     </div>
-
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
