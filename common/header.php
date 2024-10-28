@@ -37,7 +37,7 @@ if (isset($_POST['logout'])) {
                 <div class="d-flex justify-content-between">
                     <ul class="navbar-nav">
                         <?php
-                        if (isset($_SESSION['username']) && isset($_SESSION['username']) != '') {
+                        if (isset($_SESSION['role']) && $_SESSION['role'] == 0) {
                             echo '
                             <li class="nav-item">
                                 <a class="nav-link" href="upload.php">Upload</a>

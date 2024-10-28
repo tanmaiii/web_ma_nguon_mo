@@ -30,6 +30,7 @@ if (!isset($_GET['postId'])) {
 $ketQuaThanhCong = "";
 $ketQuaLoi = "";
 
+// Xử lý khi người dùng nhấn nút trả lời
 if (isset($_POST['sbUpload'])) {
     $content = $_REQUEST['txtContent'];
     $postId = $_GET['postId'];
@@ -76,7 +77,21 @@ if (isset($_POST['sbUpload'])) {
     }
 }
 
+if (isset($_POST['sbPhanHoi'])) {
+    $sql = "INSERT INTO comments (userId, content, postId, parentId) VALUES (?, ?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("isi", $userId, $content, $postId, $commentId);
+    if ($stmt->execute()) {
+        $ketQuaThanhCong = "Upload thành công";
+        header("Location: baiviet.php?postId=$postId");
+    } else {
+        $ketQuaLoi = "Error: {$stmt->error}";
+    }
+    $stmt->close();
+}
 ?>
+
+<!-- // Bài viết -->
 <div class="container my-3" style="min-height: 80vh">
     <div class="p-3 mb-4 bg-body-tertiary rounded-3">
         <div class="container-fluid">
@@ -113,16 +128,17 @@ if (isset($_POST['sbUpload'])) {
             <?php endif; ?>
         </div>
     </div>
+    <!-- // Bình luận -->
     <div>
         <div class="">
             <h2 class="display-6">Bình luận</h2>
         </div>
 
         <?php
-        $commentSql = "SELECT c.content, c.fileUrl, c.createdAt, u.username, u.avatar 
+        $commentSql = "SELECT c.*, u.username, u.avatar 
                        FROM comments c 
                        JOIN users u ON c.userId = u.userId 
-                       WHERE c.postId = $postId 
+                       WHERE c.postId = $postId and c.status = 1 and c.parentId IS NULL
                        ORDER BY c.createdAt DESC";
         $commentResult = $conn->query($commentSql);
 
@@ -145,9 +161,69 @@ if (isset($_POST['sbUpload'])) {
                             </div>
                         <?php
                         }
+                        if ($_SESSION['role'] == 0) {
                         ?>
+                            <a href="">
+                                Ẩn bình luận
+                            </a>
+                        <?php
+                        }
+                        ?>
+                        <?php if (isset($_SESSION['userId'])): ?>
+                            <button type="button" class="btn btn-primary mt-4" data-bs-toggle="modal" data-bs-target="#modalPhanHoiBinhLuan">
+                                Phản hồi bình luận
+                            </button>
+                        <?php else: ?>
+                            <div class="alert alert-warning mt-4" role="alert">
+                                Bạn cần đăng nhập để trả lời.
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
+
+                <?php
+                $replySql = "SELECT c.* , u.username, u.avatar 
+                             FROM comments c 
+                             JOIN users u ON c.userId = u.userId 
+                             WHERE c.parentId = " . $commentRow['commentId'] . " and c.status = 1 
+                             ORDER BY c.createdAt DESC";
+                $replyResult = $conn->query($replySql);
+
+                if ($replyResult->num_rows > 0) {
+                    while ($replyRow = $replyResult->fetch_assoc()) {
+                ?>
+                        <div class="card media border p-3 d-flex flex-column mb-2" style="width: 90%; margin-left: 10%;">
+                            <div class="d-flex flex-row gap-2 align-items-center">
+                                <img width="40px" height="40px" src="<?php echo $replyRow['avatar'] ?>" alt="John Doe" class="rounded-circle">
+                                <h5><?php echo $replyRow['username'] ?></h5>
+                                <small><i><?php echo $replyRow['createdAt'] ?></i></small>
+                            </div>
+                            <div class="media-body">
+                                <p><?php echo $replyRow['content'] ?></p>
+                                <?php
+                                if ($replyRow['fileUrl']) {
+                                ?>
+                                    <div>
+                                        <img style="width: 500px; height: 500px" src="<?php echo $replyRow['fileUrl'] ?>" class="img-fluid" alt="..." />
+                                    </div>
+                                <?php
+                                }
+                                ?>
+                                <?php
+                                if ($_SESSION['role'] == 0) {
+                                ?>
+                                    <button onclick="">
+                                        Ẩn bình luận
+                                    </button>
+                                <?php
+                                }
+                                ?>
+                            </div>
+                        </div>
+                <?php
+                    }
+                }
+                ?>
         <?php
             }
         } else {
@@ -158,7 +234,48 @@ if (isset($_POST['sbUpload'])) {
 </div>
 
 
-<!-- Modal -->
+<!-- Modal phản hồi bình luận -->
+<div class="modal fade" id="modalPhanHoiBinhLuan" tabindex="-1" aria-labelledby="modalPhanHoiBinhLuan" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="modalPhanHoiBinhLuan">Phản hồi bình luận</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <?php
+                    if ($ketQuaThanhCong) {
+                        echo '<div class="alert alert-success" role="alert">';
+                        echo $ketQuaThanhCong;
+                        echo '</div>';
+                    } else if ($ketQuaLoi) {
+                        echo '<div class="alert alert-danger" role="alert">';
+                        echo $ketQuaLoi;
+                        echo '</div>';
+                    } else {
+                        echo '';
+                    }
+                    ?>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Trả lời</label>
+                        <textarea class="form-control" id="txtContent" name="txtContent" rows="6" style="resize: none;" placeholder="Nhập mô tả" required></textarea>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <div>
+                        <input type="submit" class="btn btn-primary" name="sbPhanHoi" value="Submit">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal bình luận bài viết -->
 <div class="modal fade" id="modalTraLoi" tabindex="-1" aria-labelledby="modalTraLoiLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">

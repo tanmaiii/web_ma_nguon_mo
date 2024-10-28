@@ -9,7 +9,8 @@ require 'connectSql.php';
 $idSua = "";
 $username = $password = $status = "";
 
-if (!isset($_SESSION['username'])) {
+if (!isset($_SESSION['username']) || $_SESSION['role'] != 0) {
+    header("Location: index.php");
     exit();
 }
 
